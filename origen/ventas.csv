@@ -1,0 +1,21 @@
+id,fecha,producto,categoria,cantidad,precio_unitario,vendedor,region
+1,2024-01-05,Pollo entero,Carnes,50,3500,Juan Perez,Metropolitana
+2,2024-01-05,Huevos docena,Huevos,200,2800,Maria Lopez,Metropolitana
+3,2024-01-06,Pollo troceado,Carnes,30,4200,Juan Perez,Valparaiso
+4,2024-01-06,Huevos docena,Huevos,150,2800,Carlos Ruiz,Biobio
+5,2024-01-07,Pechuga de pollo,Carnes,45,5500,Maria Lopez,Metropolitana
+6,2024-01-07,Huevos docena,Huevos,300,2800,Ana Torres,Araucania
+7,2024-01-08,Pollo entero,Carnes,60,3500,Carlos Ruiz,Valparaiso
+8,2024-01-08,Muslos de pollo,Carnes,80,3200,Juan Perez,Metropolitana
+9,2024-01-09,Huevos docena,Huevos,120,2800,Maria Lopez,Biobio
+10,2024-01-09,Pollo entero,Carnes,35,3500,Ana Torres,Araucania
+11,2024-01-10,Pechuga de pollo,Carnes,55,5500,Juan Perez,Metropolitana
+12,2024-01-10,Huevos docena,Huevos,180,2800,Carlos Ruiz,Valparaiso
+13,2024-01-11,Pollo troceado,Carnes,25,4200,Maria Lopez,Metropolitana
+14,2024-01-11,Muslos de pollo,Carnes,70,3200,Ana Torres,Biobio
+15,2024-01-12,Huevos docena,Huevos,250,2800,Juan Perez,Araucania
+16,2024-01-12,Pollo entero,Carnes,40,3500,Carlos Ruiz,Metropolitana
+17,2024-01-13,Pechuga de pollo,Carnes,65,5500,Maria Lopez,Valparaiso
+18,2024-01-13,Huevos docena,Huevos,190,2800,Juan Perez,Biobio
+19,2024-01-14,Muslos de pollo,Carnes,90,3200,Ana Torres,Metropolitana
+20,2024-01-14,Pollo troceado,Carnes,20,4200,Carlos Ruiz,Araucania

@@ -1,0 +1,24 @@
+2026-04-20 14:33:08,431 - INFO - ==================================================
+2026-04-20 14:33:08,431 - INFO - INICIO PROCESO DE INGESTA
+2026-04-20 14:33:08,431 - INFO - ==================================================
+2026-04-20 14:33:08,431 - INFO - archivo origen: origen/ventas.csv
+2026-04-20 14:33:08,432 - INFO - archivo destino: data/raw/ventas_raw_20260420_143308.csv
+2026-04-20 14:33:08,432 - INFO - registros encontrados en origen: 20
+2026-04-20 14:33:08,432 - INFO - carpeta destino lista: data/raw
+2026-04-20 14:33:08,432 - INFO - archivo copiado exitosamente a: data/raw/ventas_raw_20260420_143308.csv
+2026-04-20 14:33:08,432 - INFO - verificacion ok - archivo existe en destino
+2026-04-20 14:33:08,432 - INFO - tamanio del archivo: 1.36 KB
+2026-04-20 14:33:08,432 - INFO - ==================================================
+2026-04-20 14:33:08,432 - INFO - INGESTA COMPLETADA EXITOSAMENTE
+2026-04-20 14:33:08,432 - INFO - registros procesados: 20
+2026-04-20 14:33:08,432 - INFO - log guardado en: logs/ingesta_20260420.log
+2026-04-20 14:33:08,432 - INFO - ==================================================
+2026-04-20 14:49:00 - --------------------------------------------------
+2026-04-20 14:49:00 - INICIO INGESTA
+2026-04-20 14:49:00 - --------------------------------------------------
+2026-04-20 14:49:00 - registros encontrados: 20
+2026-04-20 14:49:00 - archivo copiado a: data/raw/ventas_raw_20260420_144900.csv
+2026-04-20 14:49:00 - verificacion ok
+2026-04-20 14:49:00 - --------------------------------------------------
+2026-04-20 14:49:00 - INGESTA TERMINADA - 20 registros procesados
+2026-04-20 14:49:00 - --------------------------------------------------

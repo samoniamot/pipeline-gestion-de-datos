@@ -1,0 +1,27 @@
+# Variables de entorno con credenciales (NUNCA versionar)
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# Logs y datos generados por el pipeline
+logs/*.txt
+data/raw/*.csv
+data/processed/*.csv
+data/validated/*.csv
+data/invalid/*.csv
+
+# Editor / SO
+.DS_Store
+.vscode/
+.idea/
+*.swp

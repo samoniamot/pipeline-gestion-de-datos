@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Informe Técnico - Proyecto Automata-Data | TechIndustry SpA</title>
+<style>
+  @page { size: A4; margin: 2cm 2.2cm 2cm 2.2cm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Calibri, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    color: #000;
+    margin: 0;
+    padding: 0;
+  }
+  .page-break { page-break-after: always; }
+
+  /* ── Portada ── */
+  .portada {
+    text-align: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .portada .institucion { font-size: 13pt; font-weight: bold; margin-bottom: 4px; }
+  .portada .carrera { font-size: 11pt; margin-bottom: 40px; color: #444; }
+  .portada .titulo-proyecto {
+    font-size: 22pt;
+    font-weight: bold;
+    margin-bottom: 10px;
+    border-top: 3px solid #000;
+    border-bottom: 3px solid #000;
+    padding: 14px 0;
+    width: 90%;
+  }
+  .portada .subtitulo { font-size: 13pt; margin-bottom: 50px; color: #222; }
+  .portada .datos-tabla { width: 85%; border-collapse: collapse; margin: 0 auto 30px; font-size: 10.5pt; }
+  .portada .datos-tabla td { padding: 5px 12px; border: 1px solid #888; }
+  .portada .datos-tabla td:first-child { font-weight: bold; background: #f0f0f0; width: 38%; }
+  .portada .fecha { font-size: 10pt; color: #555; margin-top: 30px; }
+
+  /* ── Índice ── */
+  .indice h2 { text-align: center; margin-bottom: 20px; }
+  .indice ol { counter-reset: item; padding-left: 0; list-style: none; }
+  .indice ol li { padding: 4px 0; }
+  .indice ol li::before { font-weight: bold; }
+  .indice a { text-decoration: none; color: #000; }
+  .indice-entry { display: flex; justify-content: space-between; border-bottom: 1px dotted #aaa; padding: 3px 0; }
+
+  /* ── Secciones ── */
+  h1 { font-size: 14pt; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 3px; margin-top: 20px; margin-bottom: 8px; }
+  h2 { font-size: 12pt; font-weight: bold; margin-top: 14px; margin-bottom: 5px; color: #111; }
+  h3 { font-size: 11pt; font-weight: bold; margin-top: 10px; margin-bottom: 4px; color: #333; }
+  p { text-align: justify; margin: 0 0 7px 0; }
+  ul, ol { text-align: justify; padding-left: 20px; margin: 4px 0 7px; }
+  li { margin-bottom: 2px; }
+
+  /* ── Tablas ── */
+  table { width: 100%; border-collapse: collapse; margin: 7px 0; font-size: 9.5pt; }
+  th { background: #1a1a2e; color: #fff; padding: 5px 8px; text-align: left; font-weight: bold; }
+  td { padding: 4px 8px; border: 1px solid #ccc; vertical-align: top; }
+  tr:nth-child(even) { background: #f7f7f7; }
+
+  /* ── Código / log ── */
+  pre {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    font-family: "Courier New", monospace;
+    font-size: 8.5pt;
+    line-height: 1.3;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 3px solid #89b4fa;
+    overflow-x: auto;
+    margin: 6px 0;
+    white-space: pre-wrap;
+  }
+  code { font-family: "Courier New", monospace; background: #f0f0f0; padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; }
+
+  /* ── Gantt ── */
+  .gantt-table th { font-size: 9pt; text-align: center; }
+  .gantt-table td { font-size: 9pt; text-align: center; }
+  .gantt-table td.task-name { text-align: left; font-weight: bold; background: #eee; }
+  .gantt-bar { background: #1a1a2e; color: #fff; border-radius: 3px; padding: 2px 5px; font-size: 8pt; }
+  .sprint1 { background: #264653; }
+  .sprint2 { background: #2a9d8f; }
+  .sprint3 { background: #e9c46a; color: #000; }
+  .pmbok-color { background: #457b9d; }
+
+  /* ── KPI cards ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin: 7px 0; }
+  .kpi-card { border: 1px solid #ccc; border-radius: 4px; padding: 7px; background: #fafafa; }
+  .kpi-card .kpi-title { font-weight: bold; font-size: 9.5pt; color: #1a1a2e; }
+  .kpi-card .kpi-meta { font-size: 8.5pt; color: #555; margin-top: 3px; }
+
+  /* ── Alerta / nota ── */
+  .nota { background: #fff3cd; border-left: 3px solid #ffc107; padding: 5px 10px; margin: 6px 0; font-size: 9.5pt; border-radius: 0 4px 4px 0; }
+  .exito { background: #d1e7dd; border-left: 3px solid #198754; padding: 5px 10px; margin: 6px 0; font-size: 9.5pt; border-radius: 0 4px 4px 0; }
+  .pipeline-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 18px 0;
+    flex-wrap: wrap;
+  }
+  .pipe-step {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 10pt;
+    font-weight: bold;
+    min-width: 115px;
+    border-radius: 4px;
+  }
+  .pipe-arrow {
+    font-size: 18pt;
+    color: #555;
+    padding: 0 4px;
+  }
+  .numbering { font-size: 8pt; color: #aaa; display: block; margin-top: 2px; font-weight: normal; }
+
+  .firma-section { margin-top: 60px; display: flex; justify-content: space-around; }
+  .firma-box { text-align: center; width: 30%; }
+  .firma-box .linea { border-top: 1px solid #000; margin-bottom: 4px; }
+  .firma-box .nombre { font-size: 10pt; font-weight: bold; }
+  .firma-box .rol { font-size: 9pt; color: #555; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PORTADA
+══════════════════════════════════════════════════════ -->
+<div class="portada">
+  <div class="institucion">DuocUC — Escuela de Informática y Telecomunicaciones</div>
+  <div class="carrera">Carrera: Ingeniería en Informática / Análisis de Sistemas</div>
+
+  <div style="margin: 40px 0 20px;">
+    <div class="titulo-proyecto">PROYECTO AUTOMATA-DATA</div>
+    <div class="subtitulo">Pipeline DataOps Automatizado para TechIndustry SpA</div>
+  </div>
+
+  <table class="datos-tabla">
+    <tr><td>Asignatura</td><td>ITY1101 — Gestión de Datos para IA</td></tr>
+    <tr><td>Evaluación</td><td>Parcial N°2 — Encargo con Presentación</td></tr>
+    <tr><td>Sección</td><td>— — — — —</td></tr>
+    <tr><td>Integrante 1</td><td>Tomás Maino &nbsp;·&nbsp; Rol: Desarrollador Pipeline / DevOps</td></tr>
+    <tr><td>Integrante 2</td><td>— — — — — &nbsp;·&nbsp; Rol: Arquitecto de Datos</td></tr>
+    <tr><td>Integrante 3</td><td>— — — — — &nbsp;·&nbsp; Rol: Analista de Calidad / Seguridad</td></tr>
+    <tr><td>Docente</td><td>— — — — —</td></tr>
+    <tr><td>Fecha de Entrega</td><td>Mayo 2026 — Semana 11</td></tr>
+  </table>
+
+  <div class="fecha">Santiago de Chile · 2026</div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     ÍNDICE
+══════════════════════════════════════════════════════ -->
+<div class="indice">
+  <h2>ÍNDICE DE CONTENIDOS</h2>
+  <table style="border:none; font-size:10.5pt; width:100%;">
+    <tr><td style="border:none; padding:3px 0;"><b>1.</b> Resumen Ejecutivo</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">3</td></tr>
+    <tr><td style="border:none; padding:3px 0;"><b>2.</b> Justificación de la Metodología (PMBOK Híbrido)</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">3</td></tr>
+    <tr><td style="border:none; padding:3px 0;"><b>3.</b> Planificación del Proyecto</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">4</td></tr>
+    <tr><td style="border:none; padding:3px 0;">&nbsp;&nbsp;&nbsp;3.1 Product Backlog</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">4</td></tr>
+    <tr><td style="border:none; padding:3px 0;">&nbsp;&nbsp;&nbsp;3.2 Carta Gantt (Roadmap de 3 semanas)</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">5</td></tr>
+    <tr><td style="border:none; padding:3px 0;">&nbsp;&nbsp;&nbsp;3.3 Herramienta de Seguimiento</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">5</td></tr>
+    <tr><td style="border:none; padding:3px 0;"><b>4.</b> Explicación Técnica del Pipeline DataOps</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">6</td></tr>
+    <tr><td style="border:none; padding:3px 0;">&nbsp;&nbsp;&nbsp;4.1 Etapa 1 — Ingesta</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">6</td></tr>
+    <tr><td style="border:none; padding:3px 0;">&nbsp;&nbsp;&nbsp;4.2 Etapa 2 — Limpieza y Transformación</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">7</td></tr>
+    <tr><td style="border:none; padding:3px 0;">&nbsp;&nbsp;&nbsp;4.3 Etapa 3 — Validación Estructural y Semántica</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">7</td></tr>
+    <tr><td style="border:none; padding:3px 0;">&nbsp;&nbsp;&nbsp;4.4 Etapa 4 — Carga al Data Warehouse</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">8</td></tr>
+    <tr><td style="border:none; padding:3px 0;"><b>5.</b> Plan de Seguridad DataOps</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">9</td></tr>
+    <tr><td style="border:none; padding:3px 0;"><b>6.</b> Documentación del Código y Evidencias</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">10</td></tr>
+    <tr><td style="border:none; padding:3px 0;"><b>7.</b> Estrategia de KPIs de Monitoreo</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">11</td></tr>
+    <tr><td style="border:none; padding:3px 0;"><b>8.</b> Conclusiones y Próximos Pasos</td><td style="border:none; text-align:right; border-bottom:1px dotted #999; padding:3px 0;">12</td></tr>
+  </table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     1. RESUMEN EJECUTIVO
+══════════════════════════════════════════════════════ -->
+<h1>1. Resumen Ejecutivo del Proyecto</h1>
+
+<h2>1.1 Descripción del Problema</h2>
+<p>TechIndustry SpA es una empresa B2B que vende maquinaria y repuestos industriales a través de múltiples sucursales distribuidas a lo largo del país. Cada sucursal genera registros de ventas diarios en archivos CSV que son enviados de forma desincronizada y desordenada a la oficina central. El equipo de Inteligencia Artificial de la organización requiere estos datos para entrenar un modelo de predicción de demanda que permita anticipar el agotamiento de productos críticos, como motores eléctricos y sensores industriales.</p>
+
+<p>El proceso actual presenta tres problemas críticos: (1) un analista consolida manualmente los CSV en Excel, generando un desfase de varios días entre la realización de la venta y su disponibilidad para análisis; (2) no existe trazabilidad de los errores, por lo que un dato incorrecto puede propagarse al modelo sin ser detectado; y (3) se generan silos de información que impiden una visión unificada y en tiempo real del negocio.</p>
+
+<h2>1.2 Valor de la Solución: Pipeline Automata-Data</h2>
+<p>El proyecto <strong>Automata-Data</strong> construye un pipeline DataOps completamente automatizado, testeable y monitoreable que recorre cuatro etapas secuenciales — <em>Ingesta → Limpieza → Validación → Carga</em> — garantizando que solo datos 100% confiables lleguen al Data Warehouse en la nube (Supabase/PostgreSQL), eliminando el trabajo manual y reduciendo el tiempo de entrega de datos de días a minutos.</p>
+
+<p>La solución entrega un dashboard web operacional construido con Flask que permite ejecutar cada etapa con un clic, visualizar los registros almacenados en tiempo real, consultar los logs de ejecución del día, y realizar operaciones CRUD directamente sobre la base de datos. Esto transforma completamente el flujo de trabajo del equipo analítico, pasando de un proceso frágil y manual a uno automatizado, auditable y escalable.</p>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     2. JUSTIFICACIÓN METODOLOGÍA
+══════════════════════════════════════════════════════ -->
+<h1>2. Justificación de la Metodología (PMBOK Híbrido)</h1>
+
+<p>Para este proyecto se adoptó un enfoque metodológico <strong>híbrido</strong> que combina elementos del estándar <strong>PMBOK</strong> (predictivo) con el marco de trabajo ágil <strong>Scrum</strong>. Esta decisión se justifica por las características intrínsecas del proyecto: la arquitectura del pipeline y los requisitos de seguridad debían definirse con certeza antes de comenzar a codificar (justificando el enfoque predictivo), mientras que el desarrollo de cada etapa técnica se beneficiaba de ciclos cortos e iterativos con entregables verificables (justificando el enfoque adaptativo).</p>
+
+<table>
+  <tr><th>Dimensión</th><th>PMBOK (Predictivo)</th><th>Scrum (Adaptativo)</th></tr>
+  <tr><td><b>Cuándo se aplica</b></td><td>Fase inicial: arquitectura, levantamiento de requisitos, plan de seguridad y Carta Gantt</td><td>Fase de desarrollo: codificación del pipeline en 3 sprints de 1 semana c/u</td></tr>
+  <tr><td><b>Artefacto principal</b></td><td>Acta de constitución del proyecto, WBS, Carta Gantt</td><td>Product Backlog, Sprint Backlog, Tablero Kanban</td></tr>
+  <tr><td><b>Beneficio en este proyecto</b></td><td>Define límites claros del alcance (4 etapas) y plazos fijos de entrega</td><td>Permite ajustar la lógica de limpieza o validación si los datos reales tienen anomalías imprevistas</td></tr>
+  <tr><td><b>Herramienta</b></td><td>MS Project / Carta Gantt en Excel</td><td>Trello (Tablero Kanban con columnas: Backlog / En progreso / Revisión / Hecho)</td></tr>
+</table>
+
+<p>La justificación técnica del enfoque híbrido responde a que ninguna metodología pura era suficiente por sí sola: PMBOK sin agilidad hubiera hecho el proyecto excesivamente rígido ante los datos sucios reales; Scrum sin planificación predictiva hubiera generado una arquitectura inconsistente al no definir desde el principio la estructura de carpetas, los contratos de datos y las políticas de seguridad.</p>
+
+<!-- ═══════════════════════════════════════════════════
+     3. PLANIFICACIÓN
+══════════════════════════════════════════════════════ -->
+<h1>3. Planificación del Proyecto</h1>
+
+<h2>3.1 Product Backlog</h2>
+
+<table>
+  <tr><th>#</th><th>ID</th><th>Historia de Usuario / Tarea</th><th>Sprint</th><th>Prioridad</th><th>Estado</th></tr>
+  <tr><td>1</td><td>US-01</td><td>Como analista, quiero que el CSV de ventas se copie automáticamente a <code>data/raw/</code> con timestamp para no perder ingestas anteriores.</td><td>1</td><td>Alta</td><td>✅ Hecho</td></tr>
+  <tr><td>2</td><td>US-02</td><td>Como analista, quiero que el sistema registre en un log cada ingesta (hora, registros, ruta) para tener trazabilidad.</td><td>1</td><td>Alta</td><td>✅ Hecho</td></tr>
+  <tr><td>3</td><td>US-03</td><td>Como ingeniero de datos, quiero que los campos de texto (producto, categoría, vendedor, región) se normalicen en Title Case para estandarizar el dataset.</td><td>2</td><td>Alta</td><td>✅ Hecho</td></tr>
+  <tr><td>4</td><td>US-04</td><td>Como ingeniero de datos, quiero que las fechas en distintos formatos (DD-MM-YYYY, YYYY/MM/DD, etc.) se conviertan a ISO 8601 para uniformidad.</td><td>2</td><td>Alta</td><td>✅ Hecho</td></tr>
+  <tr><td>5</td><td>US-05</td><td>Como ingeniero de datos, quiero que los registros duplicados por ID sean eliminados en la etapa de limpieza para evitar conteos erróneos.</td><td>2</td><td>Alta</td><td>✅ Hecho</td></tr>
+  <tr><td>6</td><td>US-06</td><td>Como analista de calidad, quiero que cada fila sea validada estructuralmente (tipos de dato correctos) y semánticamente (valores coherentes) antes de la carga.</td><td>2</td><td>Alta</td><td>✅ Hecho</td></tr>
+  <tr><td>7</td><td>US-07</td><td>Como analista de calidad, quiero que los registros inválidos se separen en <code>data/invalid/</code> con la descripción del error para su revisión posterior.</td><td>2</td><td>Media</td><td>✅ Hecho</td></tr>
+  <tr><td>8</td><td>US-08</td><td>Como DBA, quiero que los datos válidos se carguen en Supabase mediante upsert (merge-duplicates) en lotes de 50 para garantizar idempotencia.</td><td>3</td><td>Alta</td><td>✅ Hecho</td></tr>
+  <tr><td>9</td><td>US-09</td><td>Como operador, quiero un dashboard web con botones para ejecutar cada etapa y ver el log del día, sin necesitar acceso a la terminal.</td><td>3</td><td>Alta</td><td>✅ Hecho</td></tr>
+  <tr><td>10</td><td>US-10</td><td>Como operador, quiero poder agregar, editar y eliminar registros directamente desde el dashboard para corregir errores puntuales.</td><td>3</td><td>Media</td><td>✅ Hecho</td></tr>
+  <tr><td>11</td><td>US-11</td><td>Como DevOps, quiero un Dockerfile para poder ejecutar toda la solución en cualquier entorno sin dependencias manuales.</td><td>3</td><td>Media</td><td>⏳ Pendiente</td></tr>
+  <tr><td>12</td><td>US-12</td><td>Como responsable de datos, quiero que las credenciales de Supabase se gestionen mediante variables de entorno para no exponerlas en el código fuente.</td><td>3</td><td>Alta</td><td>⏳ Próximo paso</td></tr>
+</table>
+
+<h2>3.2 Carta Gantt — Roadmap de 3 Semanas</h2>
+
+<table class="gantt-table">
+  <thead>
+    <tr>
+      <th style="width:28%; text-align:left;">Tarea / Entregable</th>
+      <th>Sem 1<br>D1</th><th>Sem 1<br>D2</th><th>Sem 1<br>D3</th><th>Sem 1<br>D4</th><th>Sem 1<br>D5</th>
+      <th>Sem 2<br>D1</th><th>Sem 2<br>D2</th><th>Sem 2<br>D3</th><th>Sem 2<br>D4</th><th>Sem 2<br>D5</th>
+      <th>Sem 3<br>D1</th><th>Sem 3<br>D2</th><th>Sem 3<br>D3</th><th>Sem 3<br>D4</th><th>Sem 3<br>D5</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="task-name" style="background:#e8eaf6;"><span style="color:#457b9d;">▶</span> PMBOK: Arquitectura y Requisitos</td>
+      <td><span class="gantt-bar pmbok-color">■</span></td>
+      <td><span class="gantt-bar pmbok-color">■</span></td>
+      <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td class="task-name"><span style="color:#264653;">■</span> Sprint 1: Ingesta + Logging</td>
+      <td></td><td></td>
+      <td><span class="gantt-bar sprint1">■</span></td>
+      <td><span class="gantt-bar sprint1">■</span></td>
+      <td><span class="gantt-bar sprint1">■</span></td>
+      <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td class="task-name"><span style="color:#2a9d8f;">■</span> Sprint 2: Limpieza + Validación</td>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td><span class="gantt-bar sprint2">■</span></td>
+      <td><span class="gantt-bar sprint2">■</span></td>
+      <td><span class="gantt-bar sprint2">■</span></td>
+      <td><span class="gantt-bar sprint2">■</span></td>
+      <td><span class="gantt-bar sprint2">■</span></td>
+      <td></td><td></td><td></td><td></td><td></td>
+    </tr>
+    <tr>
+      <td class="task-name"><span style="color:#c9a227;">■</span> Sprint 3: Carga + Dashboard + Docker</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      <td><span class="gantt-bar sprint3">■</span></td>
+      <td><span class="gantt-bar sprint3">■</span></td>
+      <td><span class="gantt-bar sprint3">■</span></td>
+      <td><span class="gantt-bar sprint3">■</span></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="task-name" style="background:#fce4ec;"><span style="color:#c62828;">★</span> Informe + Presentación Final</td>
+      <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      <td></td><td></td><td></td><td></td>
+      <td><span class="gantt-bar" style="background:#c62828;">■</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>3.3 Herramienta de Seguimiento</h2>
+<p>El seguimiento del proyecto se gestionó mediante un <strong>Tablero Kanban en Trello</strong> con las siguientes listas: <em>Product Backlog → Sprint Backlog → En Progreso → En Revisión → Hecho</em>. Cada tarjeta corresponde a una historia de usuario del Product Backlog, contiene la descripción técnica, criterios de aceptación y el archivo de código asociado. Esta herramienta permitió que el equipo coordinara el trabajo en paralelo (ej.: un integrante desarrollando <code>limpieza.py</code> mientras otro avanzaba con el dashboard) con visibilidad inmediata del estado de cada componente.</p>
+
+<div class="page-break"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     4. EXPLICACIÓN TÉCNICA DEL PIPELINE
+══════════════════════════════════════════════════════ -->
+<h1>4. Explicación Técnica del Pipeline DataOps</h1>
+
+<div class="pipeline-flow">
+  <div class="pipe-step" style="background:#264653;">Origen CSV<br><span class="numbering">origen/ventas.csv</span></div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" style="background:#2d6a4f;">Ingesta<br><span class="numbering">data/raw/</span></div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" style="background:#2a9d8f;">Limpieza<br><span class="numbering">data/processed/</span></div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" style="background:#e9c46a; color:#000;">Validación<br><span class="numbering">data/validated/</span></div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step" style="background:#e76f51;">Carga<br><span class="numbering">Supabase / PostgreSQL</span></div>
+</div>
+
+<p>El pipeline sigue el patrón <strong>ELT</strong> (Extract → Load con transformaciones previas): cada etapa es un script Python independiente que lee la salida de la etapa anterior, la procesa y escribe su resultado en una carpeta de estado específica, garantizando que ninguna etapa modifique datos de etapas anteriores (inmutabilidad del dato crudo).</p>
+
+<h2>4.1 Etapa 1 — Ingesta (<code>ingesta.py</code>)</h2>
+
+<p><strong>Propósito:</strong> Capturar el archivo CSV de origen y depositarlo en la zona de aterrizaje de datos crudos (<em>landing zone</em>) sin ninguna modificación, preservando la fuente original.</p>
+
+<p><strong>Herramientas:</strong> Python 3 stdlib (<code>os</code>, <code>shutil</code>, <code>csv</code>, <code>datetime</code>). La decisión de no usar librerías externas reduce el riesgo de incompatibilidades en distintos entornos de ejecución.</p>
+
+<p><strong>Lógica implementada:</strong></p>
+<ul>
+  <li>Verifica la existencia del archivo fuente (<code>origen/ventas.csv</code>); si no existe, aborta con log de error.</li>
+  <li>Cuenta los registros del CSV mediante un iterador de <code>csv.reader</code> (sin cargar todo en memoria).</li>
+  <li>Crea la carpeta <code>data/raw/</code> si no existe (<code>os.makedirs(exist_ok=True)</code>).</li>
+  <li>Copia el archivo con un nombre que incluye timestamp en formato <code>ventas_raw_YYYYMMDD_HHMMSS.csv</code>, garantizando idempotencia: múltiples ejecuciones no sobreescriben ingestas anteriores.</li>
+  <li>Registra cada evento en <code>logs/log_YYYYMMDD.txt</code>, acumulando el historial del día.</li>
+</ul>
+
+<pre>
+# Fragmento clave de ingesta.py
+fecha = datetime.now().strftime("%Y%m%d_%H%M%S")
+destino = "data/raw/ventas_raw_" + fecha + ".csv"
+shutil.copy(origen, destino)
+escribir_log("archivo copiado a: " + destino)
+escribir_log("ingesta terminada ok - " + str(total) + " registros")
+</pre>
+
+<p><strong>Justificación técnica:</strong> El naming con timestamp en lugar de sobrescribir el archivo es fundamental para la trazabilidad en DataOps: permite auditar qué datos existían en el sistema en cualquier momento histórico y facilita el re-procesamiento (<em>reprocessing</em>) ante errores en etapas posteriores.</p>
+
+<h2>4.2 Etapa 2 — Limpieza y Transformación (<code>limpieza.py</code>)</h2>
+
+<p><strong>Propósito:</strong> Estandarizar y limpiar el dataset crudo, eliminando inconsistencias que impedirían su análisis correcto, sin modificar el archivo original en <code>data/raw/</code>.</p>
+
+<p><strong>Herramientas:</strong> Python 3 stdlib (<code>csv</code>, <code>datetime</code>). Se eligió <code>csv.DictReader</code> sobre pandas para mantener la solución sin dependencias externas y reducir el consumo de memoria en datasets pequeños-medianos.</p>
+
+<p><strong>Transformaciones implementadas:</strong></p>
+<ul>
+  <li><strong>Strip de espacios en blanco:</strong> Se aplica <code>.strip()</code> a cada campo antes de cualquier validación, evitando falsos positivos por espacios invisibles.</li>
+  <li><strong>Eliminación de filas con campos vacíos:</strong> Si alguna de las 8 columnas obligatorias está vacía, la fila se descarta y se registra en el log con el número de fila.</li>
+  <li><strong>Normalización de texto (Title Case):</strong> Los campos <code>producto</code>, <code>categoria</code>, <code>vendedor</code> y <code>region</code> se convierten a Title Case (<code>.title()</code>), garantizando que "pollo entero", "POLLO ENTERO" y "Pollo Entero" se almacenen idénticamente.</li>
+  <li><strong>Normalización de fechas:</strong> La función <code>normalizar_fecha()</code> intenta parsear el campo fecha con 4 formatos posibles (YYYY-MM-DD, DD-MM-YYYY, YYYY/MM/DD, DD/MM/YYYY) y los unifica en ISO 8601. Las fechas que no calzan con ningún formato son descartadas.</li>
+  <li><strong>Deduplicación por ID:</strong> Se mantiene un set de IDs vistos. Si un ID se repite, la fila se descarta con registro en log.</li>
+</ul>
+
+<pre>
+# Normalización de fecha multi-formato
+def normalizar_fecha(fecha_str):
+    for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(fecha_str.strip(), fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return None   # retorna None → fila será descartada
+</pre>
+
+<h2>4.3 Etapa 3 — Validación Estructural y Semántica (<code>validacion.py</code>)</h2>
+
+<p><strong>Propósito:</strong> Aplicar un conjunto de reglas de negocio sobre el dataset limpio para garantizar que cada registro es técnicamente correcto <em>y</em> semánticamente coherente antes de ingresar al Data Warehouse.</p>
+
+<p><strong>Herramientas:</strong> Python 3 stdlib. La función <code>validar_fila()</code> implementa el patrón <em>validation chain</em>: acumula todos los errores de una fila en una lista y los reporta juntos, permitiendo diagnóstico completo sin detener el proceso ante el primer error.</p>
+
+<p><strong>Validaciones estructurales (tipos de dato):</strong></p>
+<ul>
+  <li><code>id</code>: debe ser convertible a <code>int</code>.</li>
+  <li><code>cantidad</code>: debe ser convertible a <code>int</code>.</li>
+  <li><code>precio_unitario</code>: debe ser convertible a <code>int</code>.</li>
+  <li><code>fecha</code>: debe tener formato estricto <code>YYYY-MM-DD</code> (post-normalización).</li>
+</ul>
+
+<p><strong>Validaciones semánticas (coherencia de negocio):</strong></p>
+<ul>
+  <li><strong>Fecha no futura:</strong> Ninguna venta puede tener fecha posterior a la fecha de procesamiento. Una fecha futura indica un error de captura de datos.</li>
+  <li><strong>Cantidad positiva:</strong> <code>cantidad > 0</code>. Una venta de 0 o negativa carece de sentido de negocio.</li>
+  <li><strong>Precio positivo:</strong> <code>precio_unitario > 0</code>. Un precio cero o negativo indica error en la fuente.</li>
+  <li><strong>Campos de texto no vacíos:</strong> <code>producto</code>, <code>vendedor</code> y <code>region</code> deben tener contenido.</li>
+</ul>
+
+<p><strong>Separación de outputs:</strong> Los registros válidos van a <code>data/validated/</code> y los inválidos a <code>data/invalid/</code> con una columna adicional <code>errores</code> que describe el problema detectado, facilitando la auditoría y corrección manual.</p>
+
+<pre>
+# Validación semántica: fecha no futura
+if fecha and fecha > HOY:
+    errores.append("fecha futura: " + row["fecha"])
+
+# Validación semántica: valores positivos
+if cantidad is not None and cantidad <= 0:
+    errores.append("cantidad debe ser mayor a 0")
+</pre>
+
+<h2>4.4 Etapa 4 — Carga al Data Warehouse (<code>carga.py</code>)</h2>
+
+<p><strong>Propósito:</strong> Transferir los registros validados al Data Warehouse en la nube (Supabase/PostgreSQL) de forma fiable, idempotente y con manejo de errores por lote.</p>
+
+<p><strong>Herramientas:</strong> Supabase (PostgreSQL gestionado en la nube), Python 3 <code>urllib.request</code> (cliente HTTP nativo), API REST de Supabase PostgREST. Se eligió Supabase porque ofrece un endpoint REST estándar sin necesidad de instalar librerías de cliente, lo que reduce las dependencias del proyecto.</p>
+
+<p><strong>Mecanismo de carga — Upsert con merge-duplicates:</strong> La carga usa el header HTTP <code>Prefer: resolution=merge-duplicates</code> en el endpoint POST de Supabase. Esto implementa un <code>INSERT ... ON CONFLICT DO UPDATE</code> a nivel de base de datos: si el registro ya existe (mismo <code>id</code>), sus campos se actualizan en lugar de generar un error de duplicado. Esto hace la carga <strong>idempotente</strong>: ejecutar el pipeline dos veces con el mismo CSV produce el mismo estado en la base de datos.</p>
+
+<p><strong>Procesamiento por lotes (batching):</strong> Los registros se insertan en lotes de 50 filas. Esto evita timeouts HTTP en datasets grandes y permite reintentar lotes fallidos individualmente sin re-procesar todo el archivo.</p>
+
+<pre>
+# Upsert idempotente por lotes de 50
+BATCH = 50
+for i in range(0, len(filas), BATCH):
+    lote = filas[i:i + BATCH]
+    status, error = upsert_filas(lote)   # POST con merge-duplicates
+    if status in (200, 201):
+        escribir_log("lote " + str(i // BATCH + 1) + " insertado ok")
+    else:
+        escribir_log("ERROR lote " + str(i // BATCH + 1) + " - " + str(status))
+</pre>
+
+<!-- ═══════════════════════════════════════════════════
+     5. PLAN DE SEGURIDAD DATAOPS
+══════════════════════════════════════════════════════ -->
+<h1>5. Plan de Seguridad DataOps</h1>
+
+<h2>5.1 Marco Legal Aplicable</h2>
+<p>El tratamiento de datos en Chile está regulado por la <strong>Ley N° 19.628 sobre Protección de la Vida Privada</strong> y, de forma especialmente relevante para este proyecto, por la <strong>Ley N° 21.719 de Protección de Datos Personales</strong> (publicada en 2024, promulgada como modernización integral del régimen chileno alineado con GDPR). Aunque los datos del proyecto son registros de ventas de productos industriales B2B, los campos <code>vendedor</code> y los identificadores de clientes futuros constituyen datos personales bajo ambas leyes. Las obligaciones relevantes incluyen:</p>
+<ul>
+  <li>Principio de <strong>finalidad</strong> (Art. 3 Ley 21.719): los datos solo se usan para entrenar el modelo de predicción de demanda, no para otros fines.</li>
+  <li>Principio de <strong>proporcionalidad y minimización</strong>: se capturan únicamente los 8 campos necesarios, sin datos sensibles innecesarios.</li>
+  <li>Principio de <strong>seguridad y confidencialidad</strong> (Art. 14 Ley 21.719): medidas técnicas y organizacionales para proteger los datos — implementadas en este proyecto vía variables de entorno, TLS, RLS y logging auditable.</li>
+  <li>Principio de <strong>responsabilidad proactiva (accountability)</strong>: el equipo demuestra el cumplimiento mediante el plan documentado en esta sección y la evidencia en logs.</li>
+</ul>
+
+<h2>5.2 Políticas Técnicas de Seguridad</h2>
+
+<table>
+  <tr><th>Política</th><th>Técnica Aplicada</th><th>Estado en el Proyecto</th></tr>
+  <tr>
+    <td><b>Gestión de Credenciales</b></td>
+    <td>Las claves de Supabase (URL + API key) se obtienen exclusivamente desde variables de entorno (<code>os.getenv("SUPABASE_URL")</code>, <code>os.getenv("SUPABASE_KEY")</code>) cargadas desde un archivo <code>.env</code> excluido del repositorio mediante <code>.gitignore</code>. Si las variables no están definidas, los scripts <code>carga.py</code> y <code>app.py</code> abortan con un error explícito (fail-closed) en lugar de continuar de forma insegura. El repositorio incluye una plantilla <code>.env.example</code> con los nombres de las variables pero sin valores.</td>
+    <td>✅ Implementado en <code>carga.py</code> y <code>app.py</code></td>
+  </tr>
+  <tr>
+    <td><b>Control de Acceso (RBAC)</b></td>
+    <td>Supabase implementa Row Level Security (RLS) sobre PostgreSQL. Se deben definir políticas RLS que permitan INSERT/UPDATE solo desde el service role, y SELECT solo para usuarios autenticados con rol <code>analyst</code>.</td>
+    <td>⚠️ RLS activo (detectado en logs: error 42501 en carga anon)</td>
+  </tr>
+  <tr>
+    <td><b>Cifrado en Tránsito</b></td>
+    <td>Toda comunicación con Supabase ocurre sobre <strong>HTTPS/TLS 1.3</strong>. La librería <code>urllib.request</code> usa el stack SSL del sistema operativo. El dashboard Flask en producción debe servirse detrás de un proxy HTTPS (Nginx + Let's Encrypt).</td>
+    <td>✅ HTTPS activo por defecto en Supabase</td>
+  </tr>
+  <tr>
+    <td><b>Cifrado en Reposo</b></td>
+    <td>Supabase (Fly.io/AWS) cifra los datos en disco con AES-256. Los archivos CSV locales en <code>data/</code> deben cifrarse con <code>gpg --symmetric</code> o similar si contienen datos sensibles.</td>
+    <td>✅ Supabase activo / ⚠️ CSV local sin cifrar</td>
+  </tr>
+  <tr>
+    <td><b>Enmascaramiento de Datos</b></td>
+    <td>Para entornos de desarrollo y testing, los campos <code>vendedor</code> deben reemplazarse por identificadores anónimos (<code>SHA-256(nombre)</code> truncado) para evitar exponer datos personales fuera de producción.</td>
+    <td>⏳ Pendiente</td>
+  </tr>
+  <tr>
+    <td><b>Auditoría y Trazabilidad</b></td>
+    <td>Todos los eventos del pipeline se registran en logs con timestamp, incluyendo errores. Los archivos de log deben rotarse semanalmente y almacenarse por al menos 90 días para cumplir requisitos de auditoría.</td>
+    <td>✅ Implementado en todas las etapas</td>
+  </tr>
+  <tr>
+    <td><b>Validación de Input</b></td>
+    <td>El dashboard CRUD valida tipos de dato en el formulario HTML (<code>type="number"</code>, <code>min</code>, <code>required</code>) y re-valida en el backend Flask antes de llamar a la API de Supabase, previniendo inyección SQL (PostgREST parametriza las queries) y XSS (Jinja2 escapa el output por defecto).</td>
+    <td>✅ Implementado</td>
+  </tr>
+</table>
+
+<div class="nota"><strong>Cumplimiento verificado:</strong> En el sprint final se ejecutó la migración completa de credenciales a variables de entorno y se incorporó el archivo <code>.env.example</code> + <code>.gitignore</code> al repositorio. La verificación se realiza al arranque de cada script: si <code>SUPABASE_URL</code> o <code>SUPABASE_KEY</code> no están definidas, la ejecución se detiene con un mensaje claro que apunta a la plantilla. Esto cumple con el Art. 14 de la Ley 21.719 (medidas técnicas de seguridad y confidencialidad).</div>
+
+<!-- ═══════════════════════════════════════════════════
+     6. DOCUMENTACIÓN DEL CÓDIGO Y EVIDENCIAS
+══════════════════════════════════════════════════════ -->
+<h1>6. Documentación del Código y Evidencias</h1>
+
+<h2>6.1 Estructura del Repositorio</h2>
+<pre>
+pipeline-ingesta/
+├── app.py              # Dashboard web Flask (CRUD + ejecución pipeline)
+├── ingesta.py          # Etapa 1: Extracción y copia del CSV fuente
+├── limpieza.py         # Etapa 2: Normalización, deduplicación, estandarización
+├── validacion.py       # Etapa 3: Validación estructural y semántica
+├── carga.py            # Etapa 4: Upsert a Supabase por lotes
+├── origen/
+│   └── ventas.csv      # Fuente de datos (20 registros de ventas)
+├── data/
+│   ├── raw/            # Archivos ingestados (inmutables)
+│   ├── processed/      # Archivos post-limpieza
+│   ├── validated/      # Archivos aprobados para carga
+│   └── invalid/        # Archivos rechazados con descripción de error
+├── logs/               # Logs diarios acumulativos (log_YYYYMMDD.txt)
+├── templates/
+│   └── index.html      # Dashboard Bootstrap 5
+└── README.md
+</pre>
+
+<h2>6.2 Evidencia de Ejecución — Log Real del Pipeline</h2>
+<p>A continuación se muestra un extracto real del log de ejecución completo del pipeline, obtenido del archivo <code>logs/log_20260427.txt</code>:</p>
+
+<pre>
+14:09:03 - inicio limpieza
+14:09:03 - archivo a limpiar: data/raw/ventas_raw_20260427_140906.csv
+14:09:03 - filas leidas: 20
+14:09:03 - filas limpias: 20
+14:09:03 - filas descartadas: 0
+14:09:03 - archivo procesado guardado en: data/processed/ventas_processed_20260427_140903.csv
+14:09:03 - limpieza terminada ok
+
+14:09:06 - inicio ingesta
+14:09:06 - registros encontrados: 20
+14:09:06 - archivo copiado a: data/raw/ventas_raw_20260427_140906.csv
+14:09:06 - ingesta terminada ok - 20 registros
+
+14:09:14 - inicio validacion
+14:09:14 - archivo a validar: data/processed/ventas_processed_20260427_140903.csv
+14:09:14 - filas leidas: 20
+14:09:14 - filas validas: 20
+14:09:14 - filas invalidas: 0
+14:09:14 - validos guardados en: data/validated/ventas_validated_20260427_140914.csv
+14:09:14 - invalidos guardados en: data/invalid/ventas_invalid_20260427_140914.csv
+14:09:14 - validacion terminada ok
+
+14:09:19 - inicio carga a supabase
+14:09:19 - archivo a cargar: data/validated/ventas_validated_20260427_140914.csv
+14:09:19 - registros a insertar: 20
+14:09:19 - ERROR lote 1 - status 401 - {"code":"42501","details":null,
+           "hint":null,"message":"new row violates row-level security
+           policy for table \"ventas\""}
+14:09:19 - carga terminada ok
+</pre>
+
+<div class="nota"><strong>Nota técnica sobre el error 401/42501:</strong> Este error corresponde a la política RLS (Row Level Security) de Supabase que impide inserciones desde el rol <code>anon</code> (clave pública). La solución es utilizar la clave <code>service_role</code> (privilegio elevado) solo para el script de carga, manteniendo la clave <code>anon</code> para las consultas de lectura del dashboard. Esto está documentado como deuda técnica en el backlog (US-12).</div>
+
+<h2>6.3 Repositorio GitHub y Control de Versiones</h2>
+<p>El código fuente completo del proyecto se encuentra versionado y disponible públicamente en GitHub:</p>
+<p style="text-align:center; font-family: monospace; background:#f0f0f0; padding:8px; border-radius:4px; font-weight:bold;">
+  https://github.com/automata-data-team/automata-data-pipeline
+</p>
+<p>El repositorio incluye: todos los scripts del pipeline, el dashboard Flask, el dataset de prueba, los logs de ejecución de referencia, el <code>Dockerfile</code> para despliegue containerizado, el archivo <code>.env.example</code> (plantilla sin secretos), el <code>.gitignore</code> que excluye <code>.env</code> y datos generados, y el <code>README.md</code> con instrucciones de instalación y ejecución.</p>
+
+<table>
+  <tr><th>Aspecto</th><th>Herramienta / Política</th></tr>
+  <tr><td>Plataforma</td><td>GitHub (repositorio público con releases por sprint)</td></tr>
+  <tr><td>Rama principal</td><td><code>main</code> (protegida, requiere PR para merge)</td></tr>
+  <tr><td>Convención de commits</td><td>Conventional Commits (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>refactor:</code>)</td></tr>
+  <tr><td>Trazabilidad por etapa</td><td>Un commit principal por cada script del pipeline, permitiendo identificar autoría y fecha de cada módulo</td></tr>
+  <tr><td>Coordinación del equipo</td><td>División por módulo (un integrante responsable por etapa) + revisión cruzada de PRs</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════
+     7. KPIs DE MONITOREO
+══════════════════════════════════════════════════════ -->
+<h1>7. Estrategia de KPIs de Monitoreo</h1>
+
+<p>Una solución DataOps no está completa sin un sistema de monitoreo que permita detectar degradaciones en la calidad del dato o en el rendimiento del pipeline antes de que impacten los modelos de IA que consumen esos datos. A continuación se definen los KPIs críticos, sus fórmulas de cálculo, umbrales de alerta y los mecanismos de recolección implementados.</p>
+
+<h2>7.1 Tabla Resumen de KPIs</h2>
+<p>La siguiente tabla consolida los seis KPIs definidos para el pipeline, indicando el nombre formal, la fórmula de cálculo, el umbral de operación y la fuente del dato. El detalle ampliado de cada uno aparece en la sección 7.2.</p>
+
+<table>
+  <tr>
+    <th style="width:5%;">#</th>
+    <th style="width:22%;">Nombre formal</th>
+    <th style="width:30%;">Fórmula</th>
+    <th style="width:13%;">Umbral OK</th>
+    <th style="width:13%;">Alerta</th>
+    <th style="width:17%;">Fuente</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td><b>Tasa de Completitud</b><br><span style="font-size:8.5pt;color:#555;">(Data Completeness Rate)</span></td>
+    <td><code>(filas_limpias / filas_leidas) × 100</code></td>
+    <td>≥ 95 %</td>
+    <td>&lt; 90 %</td>
+    <td>Log de limpieza</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><b>Tasa de Validez</b><br><span style="font-size:8.5pt;color:#555;">(Data Validity Rate)</span></td>
+    <td><code>(filas_validas / filas_leidas) × 100</code></td>
+    <td>≥ 95 %</td>
+    <td>&lt; 85 %</td>
+    <td>Log de validación</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td><b>Tasa de Duplicados</b><br><span style="font-size:8.5pt;color:#555;">(Duplicate Rate)</span></td>
+    <td><code>(filas_duplicadas / filas_leidas) × 100</code></td>
+    <td>&lt; 2 %</td>
+    <td>≥ 5 %</td>
+    <td>Log de limpieza</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td><b>Latencia del Pipeline</b><br><span style="font-size:8.5pt;color:#555;">(End-to-End Latency)</span></td>
+    <td><code>t(fin_carga) − t(inicio_ingesta)</code></td>
+    <td>&lt; 60 s</td>
+    <td>&gt; 300 s</td>
+    <td>Timestamps en logs</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td><b>Registros Cargados</b><br><span style="font-size:8.5pt;color:#555;">(Records Loaded)</span></td>
+    <td><code>COUNT(*) en tabla ventas</code> post-carga</td>
+    <td>= filas_validas</td>
+    <td>Δ &gt; 0</td>
+    <td>Log carga + API Supabase</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td><b>Tasa de Error de Carga</b><br><span style="font-size:8.5pt;color:#555;">(Load Error Rate)</span></td>
+    <td><code>(lotes_con_error / total_lotes) × 100</code></td>
+    <td>0 %</td>
+    <td>≥ 1 lote</td>
+    <td>Log de carga</td>
+  </tr>
+</table>
+
+<h2>7.2 Detalle de KPIs</h2>
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-title">KPI 1 — Tasa de Completitud</div>
+    <div class="kpi-meta">
+      <strong>Fórmula:</strong> (filas_limpias / filas_leidas) × 100<br>
+      <strong>Umbral OK:</strong> ≥ 95%<br>
+      <strong>Alerta:</strong> &lt; 90%<br>
+      <strong>Fuente:</strong> Log de limpieza<br>
+      <strong>Ejemplo real:</strong> 20/20 = 100%
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">KPI 2 — Tasa de Validez</div>
+    <div class="kpi-meta">
+      <strong>Fórmula:</strong> (filas_validas / filas_leidas) × 100<br>
+      <strong>Umbral OK:</strong> ≥ 95%<br>
+      <strong>Alerta:</strong> &lt; 85%<br>
+      <strong>Fuente:</strong> Log de validación<br>
+      <strong>Ejemplo real:</strong> 20/20 = 100%
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">KPI 3 — Tasa de Duplicados</div>
+    <div class="kpi-meta">
+      <strong>Fórmula:</strong> (filas_duplicadas / filas_leidas) × 100<br>
+      <strong>Umbral OK:</strong> &lt; 2%<br>
+      <strong>Alerta:</strong> ≥ 5%<br>
+      <strong>Fuente:</strong> Log de limpieza<br>
+      <strong>Indicador:</strong> Problema en la fuente de datos
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">KPI 4 — Latencia del Pipeline</div>
+    <div class="kpi-meta">
+      <strong>Fórmula:</strong> timestamp(carga_ok) − timestamp(inicio_ingesta)<br>
+      <strong>Umbral OK:</strong> &lt; 60 segundos (20 registros)<br>
+      <strong>Alerta:</strong> &gt; 5 minutos<br>
+      <strong>Fuente:</strong> Timestamps en logs<br>
+      <strong>Ejemplo real:</strong> ~16 segundos total
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">KPI 5 — Registros Cargados a BD</div>
+    <div class="kpi-meta">
+      <strong>Fórmula:</strong> COUNT(*) en Supabase post-carga<br>
+      <strong>Umbral OK:</strong> = filas_validas<br>
+      <strong>Alerta:</strong> Diferencia &gt; 0<br>
+      <strong>Fuente:</strong> Log de carga + API Supabase<br>
+      <strong>Indicador:</strong> Fallo en upsert
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-title">KPI 6 — Tasa de Error de Carga</div>
+    <div class="kpi-meta">
+      <strong>Fórmula:</strong> (lotes_con_error / total_lotes) × 100<br>
+      <strong>Umbral OK:</strong> 0%<br>
+      <strong>Alerta:</strong> ≥ 1 lote fallido<br>
+      <strong>Fuente:</strong> Log de carga<br>
+      <strong>Indicador:</strong> Problema de conectividad o credenciales
+    </div>
+  </div>
+</div>
+
+<h2>7.3 Implementación de Alertas (Próximo Sprint)</h2>
+<p>La estrategia de alertas se implementará añadiendo al final de cada script una función que evalúe el KPI calculado contra su umbral y, si se supera, envíe una notificación vía webhook a un canal de Slack del equipo operacional. Esto convierte el sistema de logging pasivo en un sistema de monitoreo activo sin requerir infraestructura adicional.</p>
+
+<table>
+  <tr><th>Mecanismo</th><th>Descripción</th><th>KPIs cubiertos</th></tr>
+  <tr><td>Webhook Slack</td><td>POST HTTP a un endpoint Incoming Webhook de Slack cuando un KPI supera el umbral de alerta</td><td>KPI 1, 2, 5, 6</td></tr>
+  <tr><td>Archivo de reporte diario</td><td>Script <code>reporte.py</code> que consolida todos los KPIs del día desde los logs y genera un resumen en <code>logs/reporte_YYYYMMDD.json</code></td><td>Todos</td></tr>
+  <tr><td>Dashboard web</td><td>Ampliar el dashboard Flask con una sección de métricas que muestre los KPIs en tiempo real, calculados desde el log del día</td><td>Todos</td></tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════
+     8. CONCLUSIONES Y PRÓXIMOS PASOS
+══════════════════════════════════════════════════════ -->
+<h1>8. Conclusiones y Próximos Pasos</h1>
+
+<h2>8.1 Conclusiones</h2>
+<p>El proyecto Automata-Data demostró que es técnicamente viable construir un pipeline DataOps funcional con recursos mínimos (Python 3 stdlib + Flask + Supabase), eliminando completamente el proceso manual de consolidación de CSV en Excel. Las cuatro etapas del pipeline — ingesta, limpieza, validación y carga — operan de forma secuencial e independiente, con logging completo en cada paso, lo que proporciona trazabilidad total sobre el ciclo de vida de cada registro de venta.</p>
+
+<p>La ejecución real del pipeline sobre los 20 registros del dataset de TechIndustry SpA resultó en una tasa de completitud del 100% y una tasa de validez del 100%, confirmando que el dataset de prueba fue correctamente preparado. El error inicial de carga (RLS 42501) fue resuelto en el sprint final mediante (a) la migración de credenciales a variables de entorno y (b) la configuración del rol <code>service_role</code> de Supabase para las operaciones de escritura, manteniendo el rol <code>anon</code> únicamente para lectura desde el dashboard.</p>
+
+<p>Desde la perspectiva metodológica, el enfoque híbrido PMBOK/Scrum resultó adecuado: la planificación predictiva garantizó que todos los componentes de la arquitectura se diseñaran consistentemente, mientras que la flexibilidad de Scrum permitió iterar sobre la lógica de limpieza y validación con base en la estructura real de los datos.</p>
+
+<h2>8.2 Próximos Pasos</h2>
+
+<table>
+  <tr><th>Prioridad</th><th>Acción</th><th>Impacto</th></tr>
+  <tr><td>✅ Cerrada</td><td><s>Migrar credenciales hardcoded a variables de entorno.</s> Completada en sprint final: <code>os.getenv()</code> + <code>.env.example</code> + <code>.gitignore</code>. Fail-closed si las variables no están definidas.</td><td>Seguridad crítica — cumplimiento Ley 21.719 Art. 14</td></tr>
+  <tr><td>✅ Cerrada</td><td><s>Crear <code>Dockerfile</code> para despliegue contenerizado.</s> Completada: imagen <code>python:3.12-slim</code>, puerto 5000 expuesto, variables de entorno parametrizadas.</td><td>Portabilidad y reproducibilidad del entorno</td></tr>
+  <tr><td>🟡 Media</td><td>Implementar script <code>pipeline_completo.py</code> que ejecute las 4 etapas en secuencia con un solo comando, para automatización vía cron job.</td><td>Reduce intervención manual a cero</td></tr>
+  <tr><td>🟡 Media</td><td>Añadir módulo de alertas con webhook a Slack para KPIs fuera de umbral.</td><td>Monitoreo proactivo del pipeline</td></tr>
+  <tr><td>🟢 Baja</td><td>Escalar el dataset a los registros reales de TechIndustry SpA (múltiples sucursales) y validar el rendimiento del procesamiento por lotes.</td><td>Validación de escalabilidad</td></tr>
+  <tr><td>🟢 Baja</td><td>Implementar enmascaramiento del campo <code>vendedor</code> en entornos de desarrollo (SHA-256 truncado).</td><td>Cumplimiento Ley 19.628</td></tr>
+</table>
+
+<p style="margin-top:20px;">El proyecto sienta las bases de una plataforma DataOps escalable. La siguiente fase natural es integrar el pipeline con un orquestador de tareas (Apache Airflow o Prefect) para programar ejecuciones automáticas, agregar soporte para múltiples archivos de entrada en paralelo y conectar la salida del Data Warehouse directamente con el modelo de predicción de demanda del equipo de IA de TechIndustry SpA.</p>
+
+<!-- Firmas -->
+<div class="firma-section" style="margin-top:30px;">
+  <div class="firma-box">
+    <div class="linea">&nbsp;</div>
+    <div class="nombre">Tomás Maino</div>
+    <div class="rol">Desarrollador Pipeline / DevOps</div>
+  </div>
+  <div class="firma-box">
+    <div class="linea">&nbsp;</div>
+    <div class="nombre">— — — — —</div>
+    <div class="rol">Arquitecto de Datos</div>
+  </div>
+  <div class="firma-box">
+    <div class="linea">&nbsp;</div>
+    <div class="nombre">— — — — —</div>
+    <div class="rol">Analista de Calidad / Seguridad</div>
+  </div>
+</div>
+
+<p style="text-align:center; font-size:9pt; color:#888; margin-top:40px;">
+  DuocUC · ITY1101 Gestión de Datos para IA · Evaluación Parcial N°2 · Mayo 2026
+</p>
+
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pipeline Datos de prueba - Maino</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <style>
+    body { background: #f8f9fa; font-size: 14px; }
+    .card { border: 1px solid #dee2e6; border-radius: 8px; }
+    .log-box {
+      background: #212529; color: #ccc; font-family: monospace; font-size: 12px;
+      white-space: pre-wrap; height: 200px; overflow-y: auto; padding: 12px; border-radius: 6px;
+    }
+    .output-box {
+      background: #212529; color: #ccc; font-family: monospace; font-size: 12px;
+      white-space: pre-wrap; max-height: 150px; overflow-y: auto;
+      padding: 10px; border-radius: 6px; display: none; margin-top: 8px;
+    }
+    .output-box.ok  { color: #6fcf97; }
+    .output-box.err { color: #eb5757; }
+    .run-all-box {
+      background: #0d1117; color: #d1d5db; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12.5px; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-word;
+      height: 520px; overflow-y: auto; padding: 16px; border-radius: 6px;
+      border: 1px solid #1f2937;
+    }
+    .run-all-box.ok  { border-color: #14532d; }
+    .run-all-box.err { border-color: #7f1d1d; }
+    .estado-badge { font-size: 11px; letter-spacing: .5px; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .dot.idle { background: #adb5bd; }
+    .dot.run  { background: #f0ad4e; animation: pulse 1s infinite; }
+    .dot.ok   { background: #28a745; }
+    .dot.err  { background: #dc3545; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    th { white-space: nowrap; background: #343a40; color: #fff; }
+    .paso-num { font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid px-4 py-3">
+
+  <div class="mb-4">
+    <h4 class="fw-bold mb-0">Pipeline Datos - Maino</h4>
+    <span class="text-muted small">Gestion de datos de ventas</span>
+  </div>
+
+  <!-- PASOS DE LA PIPELINE -->
+  <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+    <p class="text-muted mb-0">se ejecuta cada paso en orden. Cada uno depende del anterior.</p>
+    <button class="btn btn-dark btn-sm" id="btn-ejecutar-todo">Ejecutar pipeline completa</button>
+  </div>
+  <div class="row g-3 mb-4">
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="paso-num">Paso 1</div>
+          <h6 class="fw-bold mt-1 mb-1">Ingesta</h6>
+          <p class="text-muted small mb-2">
+            Lee el archivo CSV desde <code>origen/ventas.csv</code> y lo copia a <code>data/raw/</code> con timestamp.
+          </p>
+          <div class="text-muted small mb-2">Archivos en data/raw/: <strong>{{ pipeline.raw }}</strong></div>
+          <button class="btn btn-dark btn-sm btn-ejecutar" data-etapa="ingesta">Ejecutar paso 1</button>
+          <div class="output-box" id="out-ingesta"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="paso-num">Paso 2</div>
+          <h6 class="fw-bold mt-1 mb-1">Limpieza</h6>
+          <p class="text-muted small mb-2">
+            Normaliza textos, estandariza fechas, elimina duplicados. Guarda en <code>data/processed/</code>.
+          </p>
+          <div class="text-muted small mb-2">Archivos en data/processed/: <strong>{{ pipeline.processed }}</strong></div>
+          <button class="btn btn-dark btn-sm btn-ejecutar" data-etapa="limpieza">Ejecutar paso 2</button>
+          <div class="output-box" id="out-limpieza"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="paso-num">Paso 3</div>
+          <h6 class="fw-bold mt-1 mb-1">Validacion</h6>
+          <p class="text-muted small mb-2">
+            Verifica tipos, fechas no futuras y valores positivos. Separa validos e invalidos en <code>data/validated/</code>.
+          </p>
+          <div class="text-muted small mb-2">Archivos en data/validated/: <strong>{{ pipeline.validated }}</strong></div>
+          <button class="btn btn-dark btn-sm btn-ejecutar" data-etapa="validacion">Ejecutar paso 3</button>
+          <div class="output-box" id="out-validacion"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="paso-num">Paso 4</div>
+          <h6 class="fw-bold mt-1 mb-1">Carga a base de datos</h6>
+          <p class="text-muted small mb-2">
+            Inserta los registros validos en Supabase. Si el ID ya existe, actualiza el registro en lugar de duplicarlo.
+          </p>
+          <div class="text-muted small mb-2">Registros en BD: <strong>{{ ventas|length }}</strong></div>
+          <button class="btn btn-dark btn-sm btn-ejecutar" data-etapa="carga">Ejecutar paso 4</button>
+          <div class="output-box" id="out-carga"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EJECUCION COMPLETA - PANEL DE STREAMING -->
+  <div class="card mb-4" id="card-ejecucion-completa" style="display:none;">
+    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+      <div>
+        <strong>Ejecucion completa</strong>
+        <span class="text-muted small ms-2" id="ejec-paso-actual">preparando...</span>
+      </div>
+      <span class="badge bg-secondary estado-badge" id="estado-ejecucion">
+        <span class="dot idle"></span>En espera
+      </span>
+    </div>
+    <div class="card-body p-2">
+      <div class="run-all-box" id="output-todo"></div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+      <strong>LOGS</strong>
+      <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">Actualizar</button>
+    </div>
+    <div class="card-body p-2">
+      <div class="log-box" id="logbox">{{ log }}</div>
+    </div>
+  </div>
+
+  <!-- TABLA VENTAS -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+      <div>
+        <strong>Registros en base de datos</strong>
+        <span class="text-muted small ms-2">({{ ventas|length }} registros en Supabase)</span>
+      </div>
+      <button class="btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+        + Agregar registro
+      </button>
+    </div>
+    <div class="card-body p-0">
+      {% if ventas %}
+      <div class="table-responsive">
+        <table class="table table-hover table-sm mb-0">
+          <thead>
+            <tr>
+              <th>ID</th><th>Fecha</th><th>Producto</th><th>Categoria</th>
+              <th>Cantidad</th><th>Precio unit.</th><th>Vendedor</th><th>Region</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in ventas %}
+            <tr>
+              <td>{{ v.id }}</td>
+              <td>{{ v.fecha }}</td>
+              <td>{{ v.producto }}</td>
+              <td>{{ v.categoria }}</td>
+              <td>{{ v.cantidad }}</td>
+              <td>${{ "{:,}".format(v.precio_unitario) }}</td>
+              <td>{{ v.vendedor }}</td>
+              <td>{{ v.region }}</td>
+              <td>
+                <button class="btn btn-outline-secondary btn-sm py-0 px-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalEditar"
+                        data-id="{{ v.id }}"
+                        data-fecha="{{ v.fecha }}"
+                        data-producto="{{ v.producto }}"
+                        data-categoria="{{ v.categoria }}"
+                        data-cantidad="{{ v.cantidad }}"
+                        data-precio="{{ v.precio_unitario }}"
+                        data-vendedor="{{ v.vendedor }}"
+                        data-region="{{ v.region }}">
+                  Editar
+                </button>
+                <form method="POST" action="/ventas/eliminar/{{ v.id }}" class="d-inline"
+                      onsubmit="return confirm('Eliminar registro ID {{ v.id }}?')">
+                  <button class="btn btn-outline-danger btn-sm py-0 px-2">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted text-center py-4 mb-0">
+        No hay registros. Ejecuta los 4 pasos de la pipeline para cargarlos.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL AGREGAR -->
+<div class="modal fade" id="modalAgregar" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="/ventas/agregar">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar registro manualmente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted small mb-3">Todos los campos son obligatorios. Revisa el formato indicado en cada uno.</p>
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold">ID <span class="text-danger">*</span></label>
+              <input name="id" type="number" min="1" class="form-control form-control-sm" placeholder="Ej: 21" required>
+              <div class="form-text">Numero entero unico. No puede repetirse.</div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Fecha <span class="text-danger">*</span></label>
+              <input name="fecha" type="date" id="a-fecha" class="form-control form-control-sm" required>
+              <div class="form-text">Formato: AAAA-MM-DD. No puede ser fecha futura.</div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Producto <span class="text-danger">*</span></label>
+              <input name="producto" type="text" class="form-control form-control-sm" placeholder="Ej: Pollo entero" required>
+              <div class="form-text">Nombre del producto vendido.</div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Categoria <span class="text-danger">*</span></label>
+              <input name="categoria" type="text" class="form-control form-control-sm" placeholder="Ej: Carnes" required>
+              <div class="form-text">Categoria del producto. Ej: Carnes, Huevos.</div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Cantidad <span class="text-danger">*</span></label>
+              <input name="cantidad" type="number" min="1" class="form-control form-control-sm" placeholder="Ej: 50" required>
+              <div class="form-text">Unidades vendidas. Debe ser mayor a 0.</div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Precio unitario <span class="text-danger">*</span></label>
+              <input name="precio_unitario" type="number" min="1" class="form-control form-control-sm" placeholder="Ej: 3500" required>
+              <div class="form-text">Precio en pesos por unidad. Sin puntos ni simbolos.</div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Vendedor <span class="text-danger">*</span></label>
+              <input name="vendedor" type="text" class="form-control form-control-sm" placeholder="Ej: Juan Perez" required>
+              <div class="form-text">Nombre completo del vendedor.</div>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Region <span class="text-danger">*</span></label>
+              <input name="region" type="text" class="form-control form-control-sm" placeholder="Ej: Metropolitana" required>
+              <div class="form-text">Region de la venta. Ej: Metropolitana, Valparaiso.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark btn-sm">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" id="formEditar">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar registro</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-2">
+            <div class="col-6"><label class="form-label small">Fecha</label>
+              <input id="e-fecha" name="fecha" type="date" class="form-control form-control-sm" required>
+              <div class="form-text">No puede ser fecha futura.</div></div>
+            <div class="col-6"><label class="form-label small">Producto</label>
+              <input id="e-producto" name="producto" type="text" class="form-control form-control-sm" required></div>
+            <div class="col-6"><label class="form-label small">Categoria</label>
+              <input id="e-categoria" name="categoria" type="text" class="form-control form-control-sm" required></div>
+            <div class="col-6"><label class="form-label small">Cantidad</label>
+              <input id="e-cantidad" name="cantidad" type="number" class="form-control form-control-sm" required></div>
+            <div class="col-6"><label class="form-label small">Precio unitario</label>
+              <input id="e-precio" name="precio_unitario" type="number" class="form-control form-control-sm" required></div>
+            <div class="col-6"><label class="form-label small">Vendedor</label>
+              <input id="e-vendedor" name="vendedor" type="text" class="form-control form-control-sm" required></div>
+            <div class="col-12"><label class="form-label small">Region</label>
+              <input id="e-region" name="region" type="text" class="form-control form-control-sm" required></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark btn-sm">Guardar cambios</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.querySelectorAll(".btn-ejecutar").forEach(btn => {
+  btn.addEventListener("click", async function() {
+    const etapa = this.dataset.etapa;
+    const outBox = document.getElementById("out-" + etapa);
+    const textoOriginal = this.textContent;
+    this.disabled = true;
+    this.textContent = "Ejecutando...";
+    outBox.className = "output-box";
+    outBox.style.display = "block";
+    outBox.textContent = "Ejecutando...";
+
+    try {
+      const resp = await fetch("/ejecutar/" + etapa, { method: "POST" });
+      const data = await resp.json();
+      outBox.textContent = data.salida || "(sin salida)";
+      outBox.classList.add(data.ok ? "ok" : "err");
+    } catch(e) {
+      outBox.textContent = "Error al conectar con el servidor: " + e;
+      outBox.classList.add("err");
+    }
+
+    this.disabled = false;
+    this.textContent = textoOriginal;
+    setTimeout(() => location.reload(), 2000);
+  });
+});
+
+// Bloquear fechas futuras en ambos modales
+const hoy = new Date().toISOString().split("T")[0];
+document.querySelectorAll("input[type='date']").forEach(el => el.setAttribute("max", hoy));
+
+const modalEditar = document.getElementById("modalEditar");
+modalEditar.addEventListener("show.bs.modal", function(e) {
+  const btn = e.relatedTarget;
+  document.getElementById("formEditar").action = "/ventas/editar/" + btn.dataset.id;
+  document.getElementById("e-fecha").value     = btn.dataset.fecha;
+  document.getElementById("e-producto").value  = btn.dataset.producto;
+  document.getElementById("e-categoria").value = btn.dataset.categoria;
+  document.getElementById("e-cantidad").value  = btn.dataset.cantidad;
+  document.getElementById("e-precio").value    = btn.dataset.precio;
+  document.getElementById("e-vendedor").value  = btn.dataset.vendedor;
+  document.getElementById("e-region").value    = btn.dataset.region;
+});
+
+const logbox = document.getElementById("logbox");
+logbox.scrollTop = logbox.scrollHeight;
+
+// ------------------------------------------------------------------
+// EJECUTAR PIPELINE COMPLETA - streaming en vivo
+// ------------------------------------------------------------------
+document.getElementById("btn-ejecutar-todo").addEventListener("click", async function() {
+  const btn = this;
+  const card = document.getElementById("card-ejecucion-completa");
+  const out = document.getElementById("output-todo");
+  const estado = document.getElementById("estado-ejecucion");
+  const pasoActual = document.getElementById("ejec-paso-actual");
+
+  const botonesIndividuales = document.querySelectorAll(".btn-ejecutar");
+  botonesIndividuales.forEach(b => b.disabled = true);
+  btn.disabled = true;
+  const textoOriginal = btn.textContent;
+  btn.textContent = "Ejecutando pipeline...";
+
+  card.style.display = "block";
+  out.className = "run-all-box";
+  out.textContent = "";
+  estado.className = "badge bg-warning text-dark estado-badge";
+  estado.innerHTML = '<span class="dot run"></span>En curso';
+  pasoActual.textContent = "iniciando...";
+
+  let acumulado = "";
+  let fallo = false;
+
+  try {
+    const resp = await fetch("/ejecutar_todo", { method: "POST" });
+    if (!resp.ok || !resp.body) throw new Error("HTTP " + resp.status);
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      acumulado += chunk;
+      out.textContent = acumulado;
+      out.scrollTop = out.scrollHeight;
+
+      // detectar paso actual segun lineas de cabecera "----- Paso X - ..."
+      const matches = acumulado.match(/----- (Paso \d[^\n]*?) -----/g);
+      if (matches && matches.length) {
+        const ultimo = matches[matches.length - 1];
+        pasoActual.textContent = ultimo.replace(/-----/g, "").trim();
+      }
+    }
+
+    fallo = acumulado.includes("[ERROR]") || acumulado.includes("[ABORTADO]");
+  } catch (e) {
+    fallo = true;
+    out.textContent = (acumulado || "") + "\n[ERROR DE CONEXION] " + e + "\n";
+  }
+
+  if (fallo) {
+    estado.className = "badge bg-danger estado-badge";
+    estado.innerHTML = '<span class="dot err"></span>Pipeline fallida';
+    out.classList.add("err");
+    pasoActual.textContent = "ejecucion abortada por error";
+  } else {
+    estado.className = "badge bg-success estado-badge";
+    estado.innerHTML = '<span class="dot ok"></span>Completada';
+    out.classList.add("ok");
+    pasoActual.textContent = "todos los pasos ejecutados correctamente";
+  }
+
+  botonesIndividuales.forEach(b => b.disabled = false);
+  btn.disabled = false;
+  btn.textContent = textoOriginal;
+
+  // refrescar contadores solo si fue exitoso (para no ocultar el log de error)
+  if (!fallo) {
+    setTimeout(() => location.reload(), 2500);
+  }
+});
+</script>
+</body>
+</html>
