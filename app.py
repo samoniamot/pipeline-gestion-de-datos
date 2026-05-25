@@ -1,9 +1,12 @@
 import os
+import io
+import csv
 import json
 import subprocess
 import urllib.request
 import urllib.error
 from datetime import datetime
+from collections import defaultdict
 from flask import Flask, render_template, request, redirect, url_for, jsonify, Response, stream_with_context
 
 try:
@@ -220,6 +223,93 @@ def editar(id_venta):
 def eliminar(id_venta):
     delete_venta(id_venta)
     return redirect(url_for("index"))
+
+
+# ---------------------------------------------------------------------------
+# Capa de visualizacion (BI) sobre los datos cargados
+# No es una etapa del pipeline ETL (sigue siendo de 4 fases): es una capa de
+# consumo que lee la tabla ya cargada en Supabase y la presenta como metricas.
+# ---------------------------------------------------------------------------
+
+def _num(valor):
+    try:
+        return int(valor)
+    except (ValueError, TypeError):
+        return 0
+
+def calcular_metricas(ventas):
+    total_ingresos = 0
+    total_unidades = 0
+    por_categoria = defaultdict(int)
+    por_region = defaultdict(int)
+    por_fecha = defaultdict(int)
+    por_vendedor = defaultdict(int)
+    por_producto = defaultdict(int)
+
+    for v in ventas:
+        cantidad = _num(v.get("cantidad"))
+        precio = _num(v.get("precio_unitario"))
+        monto = cantidad * precio
+
+        total_ingresos += monto
+        total_unidades += cantidad
+        por_categoria[v.get("categoria", "Sin categoria")] += monto
+        por_region[v.get("region", "Sin region")] += monto
+        por_fecha[v.get("fecha", "sin fecha")] += monto
+        por_vendedor[v.get("vendedor", "Sin vendedor")] += monto
+        por_producto[v.get("producto", "Sin producto")] += monto
+
+    n = len(ventas)
+    ticket_promedio = round(total_ingresos / n) if n else 0
+
+    # top 5 productos por ingresos
+    top_productos = sorted(por_producto.items(), key=lambda x: -x[1])[:5]
+
+    return {
+        "total_ingresos": total_ingresos,
+        "total_unidades": total_unidades,
+        "n_transacciones": n,
+        "ticket_promedio": ticket_promedio,
+        "por_categoria": dict(por_categoria),
+        "por_region": dict(por_region),
+        "por_fecha": dict(sorted(por_fecha.items())),
+        "por_vendedor": dict(sorted(por_vendedor.items(), key=lambda x: -x[1])),
+        "top_productos": dict(top_productos),
+    }
+
+@app.route("/dashboard")
+def dashboard():
+    ventas = get_ventas()
+    metricas = calcular_metricas(ventas)
+    return render_template("dashboard.html", metricas=metricas,
+                           metricas_json=json.dumps(metricas),
+                           generado=datetime.now().strftime("%Y-%m-%d %H:%M"))
+
+@app.route("/exportar/csv")
+def exportar_csv():
+    ventas = get_ventas()
+    columnas = ["id", "fecha", "producto", "categoria", "cantidad",
+                "precio_unitario", "vendedor", "region"]
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=columnas, extrasaction="ignore")
+    writer.writeheader()
+    for v in ventas:
+        writer.writerow(v)
+    contenido = buffer.getvalue()
+    nombre = "ventas_export_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv"
+    return Response(
+        contenido,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=" + nombre},
+    )
+
+@app.route("/exportar/informe")
+def exportar_informe():
+    ventas = get_ventas()
+    metricas = calcular_metricas(ventas)
+    return render_template("informe_export.html", metricas=metricas,
+                           ventas=ventas,
+                           generado=datetime.now().strftime("%Y-%m-%d %H:%M"))
 
 
 if __name__ == "__main__":

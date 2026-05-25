@@ -1,21 +1,21 @@
 id,fecha,producto,categoria,cantidad,precio_unitario,vendedor,region
-1,2024-01-05,Pollo entero,Carnes,50,3500,Juan Perez,Metropolitana
-2,2024-01-05,Huevos docena,Huevos,200,2800,Maria Lopez,Metropolitana
-3,2024-01-06,Pollo troceado,Carnes,30,4200,Juan Perez,Valparaiso
-4,2024-01-06,Huevos docena,Huevos,150,2800,Carlos Ruiz,Biobio
-5,2024-01-07,Pechuga de pollo,Carnes,45,5500,Maria Lopez,Metropolitana
-6,2024-01-07,Huevos docena,Huevos,300,2800,Ana Torres,Araucania
-7,2024-01-08,Pollo entero,Carnes,60,3500,Carlos Ruiz,Valparaiso
-8,2024-01-08,Muslos de pollo,Carnes,80,3200,Juan Perez,Metropolitana
-9,2024-01-09,Huevos docena,Huevos,120,2800,Maria Lopez,Biobio
-10,2024-01-09,Pollo entero,Carnes,35,3500,Ana Torres,Araucania
-11,2024-01-10,Pechuga de pollo,Carnes,55,5500,Juan Perez,Metropolitana
-12,2024-01-10,Huevos docena,Huevos,180,2800,Carlos Ruiz,Valparaiso
-13,2024-01-11,Pollo troceado,Carnes,25,4200,Maria Lopez,Metropolitana
-14,2024-01-11,Muslos de pollo,Carnes,70,3200,Ana Torres,Biobio
-15,2024-01-12,Huevos docena,Huevos,250,2800,Juan Perez,Araucania
-16,2024-01-12,Pollo entero,Carnes,40,3500,Carlos Ruiz,Metropolitana
-17,2024-01-13,Pechuga de pollo,Carnes,65,5500,Maria Lopez,Valparaiso
-18,2024-01-13,Huevos docena,Huevos,190,2800,Juan Perez,Biobio
-19,2024-01-14,Muslos de pollo,Carnes,90,3200,Ana Torres,Metropolitana
-20,2024-01-14,Pollo troceado,Carnes,20,4200,Carlos Ruiz,Araucania
+1,2024-01-05,Motor electrico trifasico 5HP,Motores,4,680000,Juan Perez,Metropolitana
+2,2024-01-05,Sensor de proximidad inductivo,Sensores,25,45000,Maria Lopez,Antofagasta
+3,2024-01-06,Bomba hidraulica 10HP,Bombas,2,890000,Carlos Ruiz,Biobio
+4,2024-01-06,Rodamiento SKF 6205,Repuestos,30,18000,Ana Torres,Valparaiso
+5,2024-01-07,Variador de frecuencia 7.5kW,Automatizacion,3,750000,Pedro Soto,Metropolitana
+6,2024-01-08,Motor monofasico 2HP,Motores,6,320000,Juan Perez,Araucania
+7,2024-01-08,Sensor de temperatura PT100,Sensores,18,38000,Maria Lopez,Antofagasta
+8,2024-01-09,Servomotor industrial,Motores,2,1250000,Carlos Ruiz,Metropolitana
+9,2024-01-09,Correa industrial,Repuestos,22,22000,Ana Torres,Biobio
+10,2024-01-10,PLC compacto,Automatizacion,4,480000,Pedro Soto,Valparaiso
+11,2024-01-11,Bomba centrifuga,Bombas,3,540000,Juan Perez,Metropolitana
+12,2024-01-11,Sensor de presion,Sensores,10,125000,Maria Lopez,Antofagasta
+13,2024-01-12,Motor electrico trifasico 5HP,Motores,5,680000,Carlos Ruiz,Araucania
+14,2024-01-12,Contactor trifasico,Automatizacion,15,35000,Ana Torres,Metropolitana
+15,2024-01-15,Compresor de aire 100L,Repuestos,3,420000,Pedro Soto,Biobio
+16,2024-01-15,Reductor de velocidad,Motores,2,610000,Juan Perez,Valparaiso
+17,2024-01-16,Sensor de proximidad inductivo,Sensores,20,45000,Maria Lopez,Metropolitana
+18,2024-01-17,Bomba hidraulica 10HP,Bombas,1,890000,Carlos Ruiz,Antofagasta
+19,2024-01-18,Variador de frecuencia 7.5kW,Automatizacion,2,750000,Ana Torres,Biobio
+20,2024-01-19,Rodamiento SKF 6205,Repuestos,28,18000,Pedro Soto,Metropolitana

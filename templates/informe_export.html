@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Informe Ejecutivo de Ventas - TechIndustry SpA</title>
+  <style>
+    @page { size: A4; margin: 1.8cm; }
+    * { box-sizing: border-box; }
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a2e; margin: 0; padding: 24px; }
+    .barra-acciones { text-align: right; margin-bottom: 16px; }
+    .btn-print { background: #1a1a2e; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    h1 { font-size: 18pt; border-bottom: 3px solid #1a1a2e; padding-bottom: 6px; margin-bottom: 2px; }
+    .sub { color: #555; font-size: 10pt; margin-bottom: 18px; }
+    h2 { font-size: 13pt; margin-top: 22px; margin-bottom: 8px; border-left: 4px solid #2a9d8f; padding-left: 8px; }
+    .kpis { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0 8px; }
+    .kpi { flex: 1; min-width: 150px; border: 1px solid #ccc; border-radius: 6px; padding: 10px 12px; }
+    .kpi .lbl { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .5px; color: #666; }
+    .kpi .val { font-size: 17pt; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; margin: 6px 0 14px; font-size: 9.5pt; }
+    th { background: #1a1a2e; color: #fff; padding: 5px 8px; text-align: left; }
+    td { padding: 4px 8px; border: 1px solid #ddd; }
+    tr:nth-child(even) td { background: #f7f7f7; }
+    .num { text-align: right; }
+    .pie { margin-top: 26px; font-size: 8.5pt; color: #888; border-top: 1px solid #ddd; padding-top: 8px; }
+    @media print { .barra-acciones { display: none; } body { padding: 0; } }
+  </style>
+</head>
+<body>
+
+  <div class="barra-acciones">
+    <button class="btn-print" onclick="window.print()">Imprimir / Guardar como PDF</button>
+  </div>
+
+  <h1>Informe Ejecutivo de Ventas</h1>
+  <div class="sub">TechIndustry SpA &middot; Maquinaria y repuestos industriales &middot; Generado el {{ generado }}</div>
+
+  {% if metricas.n_transacciones == 0 %}
+  <p>No hay datos cargados en la base de datos.</p>
+  {% else %}
+
+  <!-- KPIS -->
+  <div class="kpis">
+    <div class="kpi"><div class="lbl">Ingresos totales</div><div class="val">${{ "{:,}".format(metricas.total_ingresos) }}</div></div>
+    <div class="kpi"><div class="lbl">Unidades vendidas</div><div class="val">{{ "{:,}".format(metricas.total_unidades) }}</div></div>
+    <div class="kpi"><div class="lbl">Transacciones</div><div class="val">{{ metricas.n_transacciones }}</div></div>
+    <div class="kpi"><div class="lbl">Ticket promedio</div><div class="val">${{ "{:,}".format(metricas.ticket_promedio) }}</div></div>
+  </div>
+
+  <!-- POR CATEGORIA -->
+  <h2>Ingresos por categoria</h2>
+  <table>
+    <tr><th>Categoria</th><th class="num">Ingresos</th><th class="num">% del total</th></tr>
+    {% for cat, monto in metricas.por_categoria.items() %}
+    <tr>
+      <td>{{ cat }}</td>
+      <td class="num">${{ "{:,}".format(monto) }}</td>
+      <td class="num">{{ "%.1f"|format(monto / metricas.total_ingresos * 100) }}%</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <!-- POR REGION -->
+  <h2>Ingresos por region</h2>
+  <table>
+    <tr><th>Region</th><th class="num">Ingresos</th><th class="num">% del total</th></tr>
+    {% for reg, monto in metricas.por_region.items() %}
+    <tr>
+      <td>{{ reg }}</td>
+      <td class="num">${{ "{:,}".format(monto) }}</td>
+      <td class="num">{{ "%.1f"|format(monto / metricas.total_ingresos * 100) }}%</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <!-- POR VENDEDOR -->
+  <h2>Ranking de vendedores</h2>
+  <table>
+    <tr><th>Vendedor</th><th class="num">Ingresos generados</th></tr>
+    {% for vend, monto in metricas.por_vendedor.items() %}
+    <tr><td>{{ vend }}</td><td class="num">${{ "{:,}".format(monto) }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <!-- DETALLE -->
+  <h2>Detalle de transacciones</h2>
+  <table>
+    <tr>
+      <th>ID</th><th>Fecha</th><th>Producto</th><th>Categoria</th>
+      <th class="num">Cant.</th><th class="num">P. unit.</th><th class="num">Subtotal</th><th>Region</th>
+    </tr>
+    {% for v in ventas %}
+    <tr>
+      <td>{{ v.id }}</td>
+      <td>{{ v.fecha }}</td>
+      <td>{{ v.producto }}</td>
+      <td>{{ v.categoria }}</td>
+      <td class="num">{{ v.cantidad }}</td>
+      <td class="num">${{ "{:,}".format(v.precio_unitario) }}</td>
+      <td class="num">${{ "{:,}".format(v.cantidad * v.precio_unitario) }}</td>
+      <td>{{ v.region }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <div class="pie">
+    Informe generado automaticamente por el pipeline DataOps Automata-Data. Datos provenientes de la base de datos Supabase (tabla ventas).
+  </div>
+
+  {% endif %}
+</body>
+</html>

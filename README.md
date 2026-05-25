@@ -8,7 +8,9 @@ Repositorio GitHub: `https://github.com/<usuario>/automata-data-pipeline`
 
 ## Descripción
 
-Pipeline DataOps de cuatro etapas (Ingesta → Limpieza → Validación → Carga) con dashboard de orquestación en Flask y persistencia en Supabase (PostgreSQL en la nube). Implementa principios DataOps: trazabilidad por logs, separación de datos crudos/procesados/validados/inválidos, idempotencia mediante `upsert`, y monitoreo de KPIs de calidad de datos.
+Pipeline DataOps de cuatro etapas (Ingesta → Limpieza → Validación → Carga) con dashboard de orquestación en Flask y persistencia en Supabase (PostgreSQL en la nube). El caso de negocio es **TechIndustry SpA**, empresa B2B que vende maquinaria y repuestos industriales (motores eléctricos, sensores, bombas, automatización). Implementa principios DataOps: trazabilidad por logs, separación de datos crudos/procesados/validados/inválidos, idempotencia mediante `upsert`, y monitoreo de KPIs de calidad de datos.
+
+Sobre la salida del pipeline (los datos ya cargados) se monta una **capa de visualización / BI** que entrega un dashboard con gráficos y exportación de informes. Esta capa es de *consumo*, no una quinta etapa del ETL: el pipeline sigue siendo de cuatro fases.
 
 ---
 
@@ -25,7 +27,9 @@ pipeline-ingesta/
 │   └── invalid/                # filas rechazadas por validación
 ├── logs/                       # logs diarios por ejecución
 ├── templates/
-│   └── index.html              # dashboard web Flask
+│   ├── index.html              # dashboard de orquestación del pipeline + CRUD
+│   ├── dashboard.html          # visualización BI (KPIs + gráficos Chart.js)
+│   └── informe_export.html     # informe ejecutivo imprimible (PDF)
 ├── ingesta.py                  # Etapa 1
 ├── limpieza.py                 # Etapa 2
 ├── validacion.py               # Etapa 3
@@ -115,6 +119,20 @@ python3 carga.py       # Etapa 4
 
 ---
 
+## Capa de Visualización (BI)
+
+Sobre los datos ya cargados se ofrece una capa de consumo accesible desde el dashboard. **No es una etapa del pipeline** (este sigue siendo de 4 fases): solo lee la tabla `ventas` de Supabase y la presenta.
+
+| Ruta | Qué hace |
+|------|----------|
+| `/dashboard` | KPIs (ingresos, unidades, ticket promedio) + 4 gráficos: ingresos por categoría, por región, evolución temporal y top productos (Chart.js) |
+| `/exportar/csv` | Descarga todos los registros de la BD como CSV |
+| `/exportar/informe` | Genera un informe ejecutivo imprimible (Ctrl+P → guardar como PDF) con KPIs, ranking de vendedores y detalle de transacciones |
+
+Se accede desde el botón "Ver dashboard y gráficos" en la página principal.
+
+---
+
 ## KPIs de Monitoreo (resumen)
 
 | # | KPI | Fórmula | Umbral |
@@ -132,7 +150,7 @@ Detalle completo en `informe_tecnico.html` sección 7.
 
 ## Dataset utilizado
 
-`origen/ventas.csv` contiene 20 registros de ventas con los campos: `id`, `fecha`, `producto`, `categoria`, `cantidad`, `precio_unitario`, `vendedor`, `region`.
+`origen/ventas.csv` contiene 20 registros de ventas de maquinaria y repuestos industriales (motores, sensores, bombas, repuestos, automatización) con los campos: `id`, `fecha`, `producto`, `categoria`, `cantidad`, `precio_unitario`, `vendedor`, `region`.
 
 ---
 

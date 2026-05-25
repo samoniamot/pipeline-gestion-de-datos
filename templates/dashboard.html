@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard de Ventas - Automata-Data</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body { background: #f8f9fa; font-size: 14px; }
+    .card { border: 1px solid #dee2e6; border-radius: 8px; }
+    .kpi-card { border-left: 4px solid #1a1a2e; }
+    .kpi-valor { font-size: 24px; font-weight: 700; color: #1a1a2e; }
+    .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #6c757d; }
+    .chart-box { position: relative; height: 280px; }
+    h6.titulo-grafico { font-weight: 700; font-size: 13px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+<div class="container-fluid px-4 py-3">
+
+  <!-- CABECERA -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h4 class="fw-bold mb-0">Dashboard de Ventas</h4>
+      <span class="text-muted small">TechIndustry SpA &middot; maquinaria y repuestos industriales &middot; generado {{ generado }}</span>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/" class="btn btn-outline-secondary btn-sm">&larr; Volver al pipeline</a>
+      <a href="/exportar/csv" class="btn btn-outline-dark btn-sm">Exportar datos (CSV)</a>
+      <a href="/exportar/informe" target="_blank" class="btn btn-dark btn-sm">Exportar informe (PDF)</a>
+    </div>
+  </div>
+
+  {% if metricas.n_transacciones == 0 %}
+  <div class="alert alert-warning">
+    No hay datos cargados en la base de datos. Ejecuta primero el pipeline completo desde la
+    <a href="/">pagina principal</a>.
+  </div>
+  {% else %}
+
+  <!-- KPIS -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+      <div class="card kpi-card h-100"><div class="card-body">
+        <div class="kpi-label">Ingresos totales</div>
+        <div class="kpi-valor">${{ "{:,}".format(metricas.total_ingresos) }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-xl-3">
+      <div class="card kpi-card h-100"><div class="card-body">
+        <div class="kpi-label">Unidades vendidas</div>
+        <div class="kpi-valor">{{ "{:,}".format(metricas.total_unidades) }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-xl-3">
+      <div class="card kpi-card h-100"><div class="card-body">
+        <div class="kpi-label">Transacciones</div>
+        <div class="kpi-valor">{{ metricas.n_transacciones }}</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-xl-3">
+      <div class="card kpi-card h-100"><div class="card-body">
+        <div class="kpi-label">Ticket promedio</div>
+        <div class="kpi-valor">${{ "{:,}".format(metricas.ticket_promedio) }}</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- GRAFICOS -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-xl-6">
+      <div class="card h-100"><div class="card-body">
+        <h6 class="titulo-grafico">Ingresos por categoria</h6>
+        <div class="chart-box"><canvas id="graf-categoria"></canvas></div>
+      </div></div>
+    </div>
+    <div class="col-12 col-xl-6">
+      <div class="card h-100"><div class="card-body">
+        <h6 class="titulo-grafico">Ingresos por region</h6>
+        <div class="chart-box"><canvas id="graf-region"></canvas></div>
+      </div></div>
+    </div>
+    <div class="col-12 col-xl-7">
+      <div class="card h-100"><div class="card-body">
+        <h6 class="titulo-grafico">Evolucion de ingresos por fecha</h6>
+        <div class="chart-box"><canvas id="graf-fecha"></canvas></div>
+      </div></div>
+    </div>
+    <div class="col-12 col-xl-5">
+      <div class="card h-100"><div class="card-body">
+        <h6 class="titulo-grafico">Top 5 productos por ingresos</h6>
+        <div class="chart-box"><canvas id="graf-productos"></canvas></div>
+      </div></div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<script>
+  const M = {{ metricas_json | safe }};
+
+  // paleta coherente con el informe
+  const PALETA = ["#1a1a2e", "#2a9d8f", "#e9c46a", "#457b9d", "#e76f51", "#264653", "#8d99ae"];
+  const fmtPeso = v => "$" + v.toLocaleString("es-CL");
+
+  function objAArrays(obj) {
+    return { labels: Object.keys(obj), data: Object.values(obj) };
+  }
+
+  if (M.n_transacciones > 0) {
+    // Ingresos por categoria - barras
+    const cat = objAArrays(M.por_categoria);
+    new Chart(document.getElementById("graf-categoria"), {
+      type: "bar",
+      data: { labels: cat.labels, datasets: [{ label: "Ingresos", data: cat.data, backgroundColor: PALETA }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmtPeso(c.raw) } } },
+        scales: { y: { ticks: { callback: v => "$" + (v/1000) + "k" } } }
+      }
+    });
+
+    // Ingresos por region - dona
+    const reg = objAArrays(M.por_region);
+    new Chart(document.getElementById("graf-region"), {
+      type: "doughnut",
+      data: { labels: reg.labels, datasets: [{ data: reg.data, backgroundColor: PALETA }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "right" }, tooltip: { callbacks: { label: c => c.label + ": " + fmtPeso(c.raw) } } }
+      }
+    });
+
+    // Evolucion temporal - linea
+    const fec = objAArrays(M.por_fecha);
+    new Chart(document.getElementById("graf-fecha"), {
+      type: "line",
+      data: { labels: fec.labels, datasets: [{ label: "Ingresos", data: fec.data, borderColor: "#2a9d8f", backgroundColor: "rgba(42,157,143,.15)", fill: true, tension: .3 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmtPeso(c.raw) } } },
+        scales: { y: { ticks: { callback: v => "$" + (v/1000) + "k" } } }
+      }
+    });
+
+    // Top productos - barras horizontal
+    const prod = objAArrays(M.top_productos);
+    new Chart(document.getElementById("graf-productos"), {
+      type: "bar",
+      data: { labels: prod.labels, datasets: [{ label: "Ingresos", data: prod.data, backgroundColor: "#457b9d" }] },
+      options: {
+        indexAxis: "y", responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmtPeso(c.raw) } } },
+        scales: { x: { ticks: { callback: v => "$" + (v/1000) + "k" } } }
+      }
+    });
+  }
+</script>
+</body>
+</html>
